@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="582" height="95"
+					   creationComplete="initFunc()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import components.Player;
+			var player:components.Player;
+			private function initFunc():void
+			{
+				 player = new components.Player(prog);
+			}
+			
+			public function clickLect():void
+			{
+				if (lectB.label == "Play")
+				{
+					player.lecture();
+					lectB.label = "Pause"
+				}
+				else
+				{
+					player.pause();
+					lectB.label = "Play";
+				}
+			}
+			
+			public function clickStop():void
+			{
+				player.stop();
+			}
+			
+			public function volumeChanged():void
+			{
+				player.setVolume(volumeB.value);
+			}
+			
+			public function barClick():void
+			{
+				player.adjustTime(prog.value);
+			}
+		]]>
+	</fx:Script>
+	<s:VGroup x="76" y="210" width="974" height="271">
+	</s:VGroup>
+	<s:Button x="10" y="14" width="101" height="63" label="Play" id="lectB" click="clickLect()"/>
+	<s:Button x="119" y="14" width="112" height="63" label="Stop" click="clickStop()"/>
+	<s:VSlider id="volumeB" x="541" y="10" height="69" change="volumeChanged()" maximum="1.0"
+			   stepSize="0.05" value="1.0"/>
+	<mx:ProgressBar id="prog" visible="true" x="238" y="14" width="295" height="63" label=""
+					chromeColor="red" direction="right" maximum="100" enabled="true" click="barClick()"
+					minimum="0" mode="manual"/>
+</s:WindowedApplication>
