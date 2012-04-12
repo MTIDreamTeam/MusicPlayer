@@ -52,5 +52,7 @@
 	<s:Button x="119" y="14" width="112" height="63" label="Stop" click="clickStop()"/>
 	<s:VSlider id="volumeB" x="541" y="10" height="69" change="volumeChanged()" maximum="1.0"
 			   stepSize="0.05" value="1.0"/>
-	<s:HSlider x="239" y="42" width="294" chromeColor="#972929" minimum="0" id="prog" change="barChange"/>
+	<s:HSlider id="prog" x="248" y="30" width="254" height="27" change="barChange()" maximum="100"
+			   minimum="0" stepSize="0.01" value="0"/>
+	
 </s:WindowedApplication>

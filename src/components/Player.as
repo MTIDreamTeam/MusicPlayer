@@ -12,8 +12,7 @@ package components
 	import flash.utils.clearInterval;
 	import flash.utils.setInterval;
 	
-	import mx.controls.HSlider;
-	import mx.controls.ProgressBar;
+	import spark.components.HSlider;
 
 	public class Player
 	{
@@ -42,7 +41,7 @@ package components
 		
 		private function positionTimerHandler(event:TimerEvent):void {
 			trace("positionTimerHandler: " + canal.position.toFixed(2));
-			progBar.setProgress(canal.position / chanson.length * 100, 100);
+			progBar.value = canal.position / chanson.length * 100;
 		}
 		
 		private function completeHandler(event:Event):void {
@@ -81,7 +80,6 @@ package components
 		
 		public function adjustTime(percent:Number):void
 		{
-			progBar.label = percent.toString();
 			canal.stop();
 			decalage = percent/100 * chanson.length;
 			canal = chanson.play(decalage);
