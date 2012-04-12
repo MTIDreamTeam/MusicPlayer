@@ -12,6 +12,7 @@ package components
 	import flash.utils.clearInterval;
 	import flash.utils.setInterval;
 	
+	import mx.controls.HSlider;
 	import mx.controls.ProgressBar;
 
 	public class Player
@@ -24,10 +25,10 @@ package components
 		private var canal:SoundChannel;
 		private var trans:SoundTransform;
 		private var fichier:String;
-		private var progBar:ProgressBar;
+		private var progBar:HSlider;
 		
 		
-		public function Player(prog:ProgressBar)
+		public function Player(prog:HSlider)
 		{
 			progBar = prog;
 			chanson = new Sound();
