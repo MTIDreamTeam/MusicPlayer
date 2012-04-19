@@ -2,7 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="582" height="95"
+					   width="784" height="497"
 					   creationComplete="initFunc()">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -46,13 +46,21 @@
 			}
 		]]>
 	</fx:Script>
-	<s:VGroup x="76" y="210" width="974" height="271">
+	<s:VGroup x="0" y="-1" width="100%" height="100%">
+		<s:HGroup width="100%" height="10%">
+			<s:Button id="lectB" width="80" height="100%" label="Play" click="clickLect()"/>
+			<s:Button width="112" height="100%" label="Stop" click="clickStop()"/>
+			<s:HSlider id="prog" width="80%" height="100%" change="barChange()" maximum="100" minimum="0"
+					   stepSize="0.01" value="0"/>
+			<s:VSlider id="volumeB" height="100%" change="volumeChanged()" maximum="1.0" stepSize="0.05"
+					   value="1.0"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="90%">
+			<mx:FileSystemTree width="24%" height="100%"/>
+			<s:VGroup width="62%" height="100%">
+			</s:VGroup>
+			<s:List width="24%" height="100%"></s:List>
+		</s:HGroup>
 	</s:VGroup>
-	<s:Button x="10" y="14" width="101" height="63" label="Play" id="lectB" click="clickLect()"/>
-	<s:Button x="119" y="14" width="112" height="63" label="Stop" click="clickStop()"/>
-	<s:VSlider id="volumeB" x="541" y="10" height="69" change="volumeChanged()" maximum="1.0"
-			   stepSize="0.05" value="1.0"/>
-	<s:HSlider id="prog" x="248" y="30" width="254" height="27" change="barChange()" maximum="100"
-			   minimum="0" stepSize="0.01" value="0"/>
 	
 </s:WindowedApplication>

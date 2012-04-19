@@ -26,6 +26,10 @@ package components
 		private var fichier:String;
 		private var progBar:HSlider;
 		
+		public function getChanson():Sound
+		{
+			return chanson;	
+		}
 		
 		public function Player(prog:HSlider)
 		{
