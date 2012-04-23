@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="784" height="497"
+					   creationComplete="initFunc()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import components.Player;
+			var player:components.Player;
+			
+			private function initFunc():void
+			{
+				player = new components.Player(prog, lyrics, cover);
+			}
+			
+			public function clickLect():void
+			{
+				if (lectB.label == "Play")
+				{
+					player.lecture();
+					lectB.label = "Pause"
+				}
+				else
+				{
+					player.pause();
+					lectB.label = "Play";
+				}
+			}
+			
+			public function clickStop():void
+			{
+				player.stop();
+			}
+			
+			public function volumeChanged():void
+			{
+				player.setVolume(volumeB.value);
+			}
+			
+			public function barChange():void
+			{
+				player.adjustTime(prog.value);
+			}
+		]]>
+	</fx:Script>
+	<s:VGroup x="0" y="-1" width="100%" height="100%">
+		<s:HGroup width="100%" height="10%">
+			<s:Button id="lectB" width="80" height="100%" label="Play" click="clickLect()"/>
+			<s:Button width="112" height="100%" label="Stop" click="clickStop()"/>
+			<s:HSlider id="prog" width="80%" height="100%" change="barChange()" maximum="100" minimum="0"
+					   stepSize="0.01" value="0"/>
+			<s:VSlider id="volumeB" height="100%" change="volumeChanged()" maximum="1.0" stepSize="0.05"
+					   value="1.0"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="90%">
+			<mx:FileSystemTree width="24%" height="100%"/>
+			<s:HGroup width="62%" height="100%">
+				<s:Image width="103" height="100" id="cover" source="C:\cover.jpg"/>
+				<s:TextArea id="lyrics" width="323" height="206" borderVisible="false"
+							editable="false" enabled="true" text="Pas de paroles."/>
+			</s:HGroup>
+			<s:List width="24%" height="100%"></s:List>
+		</s:HGroup>
+	</s:VGroup>
+	
+</s:WindowedApplication>
