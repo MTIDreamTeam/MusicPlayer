@@ -10,11 +10,31 @@
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
+			import components.Artiste;
+			import components.MusiqueId3;
 			import components.Player;
+			import components.Zik;
+			import components.saveXML;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.XMLListCollection;
+			import mx.controls.FileSystemList;
 			var player:components.Player;
+			
+			[Bindable]
+			private var artCol:ArrayCollection = new ArrayCollection([
+				new Artiste("Other", new ArrayCollection([])),
+			]);
+			
+			[Bindable]
+			[Embed(source="assets/music.png")] 
+			public var iconSymbolZik:Class;
+			private var compt:Number;
+			
 			private function initFunc():void
 			{
-				 player = new components.Player(prog, lectB);
+				 player = new components.Player(prog, lectB, lyrics, cover);
+				 compt = 0;
 			}
 			
 			public function clickLect():void
@@ -58,6 +78,48 @@
 					volB.label = "assets/volume_up.png";
 			}
 			
+			public function clickCollection():void
+			{
+				var file:File = new File(); 
+				file.addEventListener(Event.SELECT, dirSelected); 
+				file.browseForDirectory("Select a directory");
+				function dirSelected(e:Event):void { 
+					trace(file.nativePath); 
+					collection.text = file.nativePath;
+					dirCollection(file.nativePath);
+				}
+			}
+			
+			public function dirCollection(root:String):void
+			{
+				var file:File = new File(root);
+				var lastZik:MusiqueId3 = null;
+				var todo:Boolean = false;
+				if (compt == 0)
+				{
+					compt++;
+					todo = true;
+				}
+				
+				for each(var f:File in file.getDirectoryListing())
+				{
+					if (f.isDirectory)
+						dirCollection(f.nativePath);
+					else
+						if (f.extension == "mp3")
+						{	
+								var zik:MusiqueId3 = new MusiqueId3(f, artCol, iconSymbolZik);
+						}
+				}
+				if (todo == true)
+					saveXML.saveXMLtoFile(artCol);
+			}
+			
+			public function addPlaylist():void
+			{
+				trace(new String("playlist"));
+			}
+			
 			public function barChange():void
 			{
 				player.adjustTime(prog.value);
@@ -81,9 +143,22 @@
 					   skinClass="VSliderPlayer" stepSize="0.05" value="1.0"/>
 		</s:HGroup>
 		<s:HGroup width="100%" height="90%">
-			<mx:FileSystemTree width="24%" height="100%"/>
-			<s:VGroup width="62%" height="100%">
+			<s:VGroup width="24%" height="100%">
+				<s:HGroup width="200" height="30">
+					<s:Button width="30" height="30" label="assets/music.png" click="clickCollection()"
+							  skinClass="buttonIconSkin"/>
+					<s:Label id="collection" width="100%" height="30" color="#C0BBBB" fontSize="10"
+							 paddingLeft="10" paddingTop="8" text="Collection non définie"/>
+				</s:HGroup>
+				<mx:Tree id="tree" width="200" height="100%" columnCount="1" dataProvider="{artCol}"
+						 rightClick="addPlaylist()" itemRenderer="playerTreeRenderer" iconField="icon"
+						 labelField="name"></mx:Tree>
 			</s:VGroup>
+			<s:HGroup width="62%" height="100%">
+				<s:Image width="103" height="100" id="cover" source="assets/Cover.jpg"/>
+				<s:TextArea id="lyrics" width="323" height="206" borderVisible="false"
+							color="#C0BBBB" editable="false" enabled="true" text="Pas de paroles."/>
+			</s:HGroup>
 			<s:List width="24%" height="100%"></s:List>
 		</s:HGroup>
 	</s:VGroup>

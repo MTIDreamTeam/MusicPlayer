@@ -7,13 +7,24 @@ package components
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
+	import flash.media.ID3Info;
+	import flash.net.URLLoader;
+	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.Timer;
 	import flash.utils.clearInterval;
 	import flash.utils.setInterval;
-	
+
 	import spark.components.Button;
 	import spark.components.HSlider;
+
+	import flash.xml.XMLDocument;
+	import flash.xml.XMLNode;
+	import flash.xml.XMLNodeType;
+	
+	import spark.components.Image;
+	import spark.components.TextArea;
+	
 
 	public class Player
 	{
@@ -27,22 +38,24 @@ package components
 		private var trans:SoundTransform;
 		private var fichier:String;
 		private var progBar:HSlider;
-		
+		private var lyricsField:TextArea;
+		private var image:Image;
 		public function getChanson():Sound
 		{
 			return chanson;	
 		}
 		
-		public function Player(prog:HSlider, lectB:Button)
+		public function Player(prog:HSlider, lectB:Button, lyrics:TextArea, cover:Image)
 		{
 			lect = lectB;
 			progBar = prog;		
 			trans = new SoundTransform();
-			fichier = "D:\\Musique\\Armée rouge\\Le chant des partisans.mp3";
+			lyricsField = lyrics;
+			image = cover;
+			fichier = "D:\\Musique\\Within_Temptation-The_Unforgiving-CDA-2011-wAx\\04-within_temptation-faster.mp3";
 		}
-		
+			
 		private function positionTimerHandler(event:TimerEvent):void {
-			trace("positionTimerHandler: " + canal.position.toFixed(2));
 			progBar.value = canal.position / chanson.length * 100;
 		}
 		
@@ -52,6 +65,60 @@ package components
 		
 		private function id3Handler(event:Event):void {
 			trace("id3Handler: " + event);
+			var id3:ID3Info = chanson.id3;
+			var urlLyrics:String = "";
+			
+			lyricsField.text = "Chargement de la pochette et des paroles !";
+			
+			if (id3.artist != null)
+			{
+				var chargeur:URLLoader = null;
+				var adresse:URLRequest = null;
+				if (id3.songName != null)
+				{
+					urlLyrics += "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?";
+					urlLyrics += "artist=" + id3.artist;
+					urlLyrics += "&song=" + id3.songName;
+					
+					//Code pour charger URL
+					chargeur = new URLLoader ();
+					adresse = new URLRequest (urlLyrics);
+					chargeur.dataFormat = URLLoaderDataFormat.TEXT;
+					chargeur.load(adresse);
+					
+					// définition des évenements de l'objet chargeur
+					chargeur.addEventListener(Event.COMPLETE, parseLyrics);
+					chargeur.addEventListener(IOErrorEvent.IO_ERROR, indiquerErreur);
+					if (lyricsField.text == "Chargement de la pochette et des paroles !")
+						lyricsField.text = "Nous n'avons pas pu trouver les paroles de votre musique !";
+				}
+				else if (id3.album != null)
+				{
+					//http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=b25b959554ed76058ac220b7b2e0a026&artist=Cher&album=Believe
+					
+					urlLyrics += "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=b25b959554ed76058ac220b7b2e0a026&artist=";
+					urlLyrics += id3.artist;
+					urlLyrics += "&album=" + id3.album;
+					
+					//Code pour charger URL
+					chargeur = new URLLoader ();
+					adresse = new URLRequest (urlLyrics);
+					chargeur.dataFormat = URLLoaderDataFormat.TEXT;
+					chargeur.load(adresse);
+					
+					// définition des évenements de l'objet chargeur
+					chargeur.addEventListener(Event.COMPLETE, parseCover);
+					chargeur.addEventListener(IOErrorEvent.IO_ERROR, indiquerErreur);
+					
+					lyricsField.text = "Nous n'avons pas pu trouver les paroles de votre musique !";
+				}
+				else
+					lyricsField.text = "Nous n'avons pas pu trouver des informations concernant votre musique !";
+			}
+			else
+			{
+				lyricsField.text = "Nous n'avons pas pu trouver des informations concernant votre musique !";
+			}
 		}
 		
 		private function ioErrorHandler(event:Event):void {
@@ -72,7 +139,9 @@ package components
 			decalage = 0;
 			canal = null;
 			chanson = null;
+			lyricsField.text = "";
 		}
+		
 		
 		public function stop():void
 		{
@@ -131,6 +200,63 @@ package components
 			canal = chanson.play(decalage);
 			canal.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
 			canal.soundTransform = trans;
+		}
+
+		
+		public function parseLyrics(event:Event):void
+		{
+			var contenu:String = event.target.data;
+			var result:XMLDocument = new XMLDocument();
+			result.ignoreWhite = true;
+			result.parseXML(contenu);
+			
+			//Obtention des paroles dans le XML
+			var nodes:Array = result.firstChild.childNodes;
+			trace(result);
+			for each(var item:XMLNode in nodes)
+			{
+				if (item.nodeName == "Lyric")
+				{
+					if (item.firstChild != null)
+						lyricsField.text = htmlUnescape(item.firstChild.toString());
+				}
+				
+				if (item.nodeName == "LyricCovertArtUrl")
+				{
+					if (item.firstChild != null)
+						image.source = new URLRequest(item.firstChild.toString());
+				}
+			}
+		}
+		
+		public function parseCover(event:Event):void
+		{
+			var contenu:String = event.target.data;
+			var result:XMLDocument = new XMLDocument();
+			result.ignoreWhite = true;
+			result.parseXML(contenu);
+			
+			//Obtention des paroles dans le XML
+			var nodes:Array = result.firstChild.firstChild.childNodes;
+			for each(var item:XMLNode in nodes)
+			{
+				trace(item.nodeName);
+				if (item.nodeName == "image")
+				{
+					image.source = new URLRequest(item.firstChild.toString());
+					trace(item.firstChild.toString());
+				}
+			}
+		}
+		
+		public function indiquerErreur(event:Event):void
+		{
+			trace("Erreur url: " + event);
+		}
+		
+		public function htmlUnescape(str:String):String
+		{
+			return new XMLDocument(str).firstChild.nodeValue;
 		}
 	}
 }
