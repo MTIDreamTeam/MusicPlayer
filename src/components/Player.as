@@ -66,21 +66,54 @@ package components
 		private function id3Handler(event:Event):void {
 			var id3:ID3Info = chanson.id3;
 			var urlLyrics:String = "";
-			var urlCover:String = "";
 			
-			urlLyrics += "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?";
-			urlLyrics += "artist=" + id3.artist;
-			urlLyrics += "&song=" + id3.songName;
+			lyricsField.text = "Chargement de la pochette et des paroles !";
 			
-			//Code pour charger URL
-			var chargeur:URLLoader = new URLLoader ();
-			var adresse:URLRequest = new URLRequest (urlLyrics);
-			chargeur.dataFormat = URLLoaderDataFormat.TEXT;
-			chargeur.load(adresse);
-			
-			// définition des évenements de l'objet chargeur
-			chargeur.addEventListener(Event.COMPLETE, parseLyrics);
-			chargeur.addEventListener(IOErrorEvent.IO_ERROR, indiquerErreur);
+			if (id3.artist != null)
+			{
+				if (id3.songName != null && 0 == 1)
+				{
+					urlLyrics += "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?";
+					urlLyrics += "artist=" + id3.artist;
+					urlLyrics += "&song=" + id3.songName;
+					
+					//Code pour charger URL
+					var chargeur:URLLoader = new URLLoader ();
+					var adresse:URLRequest = new URLRequest (urlLyrics);
+					chargeur.dataFormat = URLLoaderDataFormat.TEXT;
+					chargeur.load(adresse);
+					
+					// définition des évenements de l'objet chargeur
+					chargeur.addEventListener(Event.COMPLETE, parseLyrics);
+					chargeur.addEventListener(IOErrorEvent.IO_ERROR, indiquerErreur);
+				}
+				else if (id3.album != null)
+				{
+					//http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=b25b959554ed76058ac220b7b2e0a026&artist=Cher&album=Believe
+					
+					urlLyrics += "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=b25b959554ed76058ac220b7b2e0a026&artist=";
+					urlLyrics += id3.artist;
+					urlLyrics += "&album=" + id3.album;
+					
+					//Code pour charger URL
+					var chargeur:URLLoader = new URLLoader ();
+					var adresse:URLRequest = new URLRequest (urlLyrics);
+					chargeur.dataFormat = URLLoaderDataFormat.TEXT;
+					chargeur.load(adresse);
+					
+					// définition des évenements de l'objet chargeur
+					chargeur.addEventListener(Event.COMPLETE, parseCover);
+					chargeur.addEventListener(IOErrorEvent.IO_ERROR, indiquerErreur);
+					
+					lyricsField.text = "Nous n'avons pas pu trouver les paroles de votre musique !";
+				}
+				else
+					lyricsField.text = "Nous n'avons pas pu trouver des informations concernant votre musique !";
+			}
+			else
+			{
+				lyricsField.text = "Nous n'avons pas pu trouver des informations concernant votre musique !";
+			}
 		}
 		
 		private function ioErrorHandler(event:Event):void {
@@ -156,6 +189,26 @@ package components
 					lyricsField.text = htmlUnescape(item.firstChild.toString());
 				
 				if (item.nodeName == "LyricCovertArtUrl")
+				{
+					image.source = new URLRequest(item.firstChild.toString());
+					trace(item.firstChild.toString());
+				}
+			}
+		}
+		
+		public function parseCover(event:Event):void
+		{
+			var contenu:String = event.target.data;
+			var result:XMLDocument = new XMLDocument();
+			result.ignoreWhite = true;
+			result.parseXML(contenu);
+			
+			//Obtention des paroles dans le XML
+			var nodes:Array = result.firstChild.firstChild.childNodes;
+			for each(var item:XMLNode in nodes)
+			{
+				trace(item.nodeName);
+				if (item.nodeName == "image")
 				{
 					image.source = new URLRequest(item.firstChild.toString());
 					trace(item.firstChild.toString());
