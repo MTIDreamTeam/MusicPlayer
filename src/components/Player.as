@@ -12,12 +12,14 @@ package components
 	import flash.utils.clearInterval;
 	import flash.utils.setInterval;
 	
+	import spark.components.Button;
 	import spark.components.HSlider;
 
 	public class Player
 	{
 		private var positionTimer:Timer;
 		private var charge:Boolean = false;
+		private var lect:Button;
 		private var temps:Number;
 		private var decalage:Number;
 		private var chanson:Sound;
@@ -31,16 +33,12 @@ package components
 			return chanson;	
 		}
 		
-		public function Player(prog:HSlider)
+		public function Player(prog:HSlider, lectB:Button)
 		{
-			progBar = prog;
-			chanson = new Sound();
+			lect = lectB;
+			progBar = prog;		
 			trans = new SoundTransform();
 			fichier = "D:\\Musique\\Armée rouge\\Le chant des partisans.mp3";
-			chanson.addEventListener(Event.COMPLETE, completeHandler);
-			chanson.addEventListener(Event.ID3, id3Handler);
-			chanson.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-			chanson.addEventListener(ProgressEvent.PROGRESS, progressHandler);
 		}
 		
 		private function positionTimerHandler(event:TimerEvent):void {
@@ -68,12 +66,21 @@ package components
 		private function soundCompleteHandler(event:Event):void {
 			trace("soundCompleteHandler: " + event);
 			positionTimer.stop();
+			progBar.value = 0;
+			lect.label = "assets/play.png";
+			charge = false;
+			decalage = 0;
+			canal = null;
+			chanson = null;
 		}
 		
 		public function stop():void
 		{
-			canal.stop();
-			decalage = 0;
+			if (canal != null)
+			{
+				canal.stop();
+				decalage = 0;
+			}
 		}
 		
 		public function pause():void
@@ -84,18 +91,23 @@ package components
 		
 		public function adjustTime(percent:Number):void
 		{
-			canal.stop();
-			decalage = percent/100 * chanson.length;
-			canal = chanson.play(decalage);
-			canal.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
-			canal.soundTransform = trans;
+			if (canal != null)
+			{
+				canal.stop();
+				decalage = percent/100 * chanson.length;
+				canal = chanson.play(decalage);
+				canal.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
+				canal.soundTransform = trans;
+			}
 		}
 		
 		public function setVolume(vol:Number):void
 		{
 			trans.volume = vol;
-			canal.soundTransform = trans;
-			
+			if (canal != null)
+			{
+				canal.soundTransform = trans;
+			}
 		}
 		
 		//On déclare la fonction lecture
@@ -103,7 +115,12 @@ package components
 		public function lecture():void
 		{
 			if (charge == false) //Si la chanson n'est pas chargée
-			{			
+			{	
+				chanson = new Sound();
+				chanson.addEventListener(Event.COMPLETE, completeHandler);
+				chanson.addEventListener(Event.ID3, id3Handler);
+				chanson.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+				chanson.addEventListener(ProgressEvent.PROGRESS, progressHandler);
 				chanson.load(new URLRequest(fichier)); //Dans le cas contraire, on charge la chanson
 				positionTimer = new Timer(50);
 				positionTimer.addEventListener(TimerEvent.TIMER, positionTimerHandler);

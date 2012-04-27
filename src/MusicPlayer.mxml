@@ -2,8 +2,9 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="784" height="497"
+					   width="858" height="497" backgroundColor="#444242"
 					   creationComplete="initFunc()">
+	<fx:Style source="MusicPlayer.css"/>
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -13,31 +14,48 @@
 			var player:components.Player;
 			private function initFunc():void
 			{
-				 player = new components.Player(prog);
+				 player = new components.Player(prog, lectB);
 			}
 			
 			public function clickLect():void
 			{
-				if (lectB.label == "Play")
+				if (lectB.label == "assets/play.png")
 				{
 					player.lecture();
-					lectB.label = "Pause"
+					lectB.label = "assets/pause.png"
 				}
 				else
 				{
 					player.pause();
-					lectB.label = "Play";
+					lectB.label = "assets/play.png";
 				}
+			}
+			
+			public function clickNext():void
+			{
+				
+			}
+			
+			public function clickPrev():void
+			{
+				
 			}
 			
 			public function clickStop():void
 			{
 				player.stop();
+				lectB.label = "assets/play.png";
 			}
 			
 			public function volumeChanged():void
 			{
 				player.setVolume(volumeB.value);
+				if (volumeB.value == 0)
+					volB.label = "assets/mute.png";
+				else if (volumeB.value > 0 && volumeB.value < 0.5)
+					volB.label = "assets/volume_down.png";
+				else
+					volB.label = "assets/volume_up.png";
 			}
 			
 			public function barChange():void
@@ -48,12 +66,19 @@
 	</fx:Script>
 	<s:VGroup x="0" y="-1" width="100%" height="100%">
 		<s:HGroup width="100%" height="10%">
-			<s:Button id="lectB" width="80" height="100%" label="Play" click="clickLect()"/>
-			<s:Button width="112" height="100%" label="Stop" click="clickStop()"/>
-			<s:HSlider id="prog" width="80%" height="100%" change="barChange()" maximum="100" minimum="0"
-					   stepSize="0.01" value="0"/>
-			<s:VSlider id="volumeB" height="100%" change="volumeChanged()" maximum="1.0" stepSize="0.05"
-					   value="1.0"/>
+			<s:Button id="lectB" width="50" height="50" label="assets/play.png" click="clickLect()" skinClass="buttonStopSkin"/>
+			<s:Button width="50" height="50" click="clickStop()" label="assets/stop.png"
+					  skinClass="buttonStopSkin"/>
+			<s:Button width="50" height="50" click="clickPrev()" label="assets/fast_backward.png"
+					  skinClass="buttonStopSkin"/>
+			<s:HSlider id="prog" width="543" height="100%" change="barChange()" maximum="100"
+					   minimum="0" skinClass="HSliderPlayer" stepSize="0.01" value="0"/>
+			<s:Button width="50" height="50" click="clickNext()" label="assets/fast_forward.png"
+					  skinClass="buttonStopSkin"/>
+			<s:Button id="volB" width="50" height="50" label="assets/volume_up.png" enabled="false"
+					  skinClass="ButtonVolSkin"/>
+			<s:VSlider id="volumeB" height="100%" change="volumeChanged()" maximum="1.0"
+					   skinClass="VSliderPlayer" stepSize="0.05" value="1.0"/>
 		</s:HGroup>
 		<s:HGroup width="100%" height="90%">
 			<mx:FileSystemTree width="24%" height="100%"/>
