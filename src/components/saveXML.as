@@ -1,5 +1,8 @@
 package components
 {
+	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	import flash.xml.XMLDocument;
 	import flash.xml.XMLNode;
 
@@ -27,5 +30,31 @@ package components
 			trace(objectToXML(items_).toString());
 		}
 		
+		static public function saveRoot(path:String):void
+		{
+			var file:File = File.applicationDirectory;
+			var file:File = new File( File.applicationDirectory.resolvePath("config.cfg").nativePath );
+			var fs:FileStream = new FileStream();
+			fs.open(file, FileMode.WRITE);
+			trace("path:" + path);
+		    fs.writeUTF(path);
+			fs.close();
+		}
+		
+		static public function getRoot():String
+		{
+			var ret:String;
+			var file:File = new File( File.applicationDirectory.resolvePath("config.cfg").nativePath );
+			trace(file.nativePath);
+			var fs:FileStream = new FileStream();
+			fs.open(file, FileMode.UPDATE)
+			if (fs.bytesAvailable == 0)
+			 	ret = "";
+			else
+				ret = fs.readUTF();
+			fs.close();
+			
+			return ret;
+		}
 	}
 }

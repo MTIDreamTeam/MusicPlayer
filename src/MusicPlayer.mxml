@@ -35,6 +35,8 @@
 			{
 				 player = new components.Player(prog, lectB, lyrics, cover);
 				 compt = 0;
+				 if (saveXML.getRoot() != "")
+					 dirCollection(saveXML.getRoot());
 			}
 			
 			public function clickLect():void
@@ -84,8 +86,8 @@
 				file.addEventListener(Event.SELECT, dirSelected); 
 				file.browseForDirectory("Select a directory");
 				function dirSelected(e:Event):void { 
-					trace(file.nativePath); 
 					collection.text = file.nativePath;
+					saveXML.saveRoot(file.nativePath);
 					dirCollection(file.nativePath);
 				}
 			}
@@ -150,9 +152,9 @@
 					<s:Label id="collection" width="100%" height="30" color="#C0BBBB" fontSize="10"
 							 paddingLeft="10" paddingTop="8" text="Collection non définie"/>
 				</s:HGroup>
-				<mx:Tree id="tree" width="200" height="100%" columnCount="1" dataProvider="{artCol}"
-						 rightClick="addPlaylist()" itemRenderer="playerTreeRenderer" iconField="icon"
-						 labelField="name"></mx:Tree>
+				<mx:Tree id="tree" width="200" height="100%" color="#C0BBBB" columnCount="1"
+						 dataProvider="{artCol}" iconField="icon" itemRenderer="playerTreeRenderer"
+						 labelField="name" rightClick="addPlaylist()"></mx:Tree>
 			</s:VGroup>
 			<s:HGroup width="62%" height="100%">
 				<s:Image width="103" height="100" id="cover" source="assets/Cover.jpg"/>
