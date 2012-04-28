@@ -17,9 +17,13 @@
 			import components.saveXML;
 			
 			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
 			import mx.collections.XMLListCollection;
 			import mx.controls.FileSystemList;
 			var player:components.Player;
+			
+			[Bindable]
+			private var playlistCol:ArrayList = new ArrayList();
 			
 			[Bindable]
 			private var artCol:ArrayCollection = new ArrayCollection([
@@ -33,23 +37,55 @@
 			
 			private function initFunc():void
 			{
-				 player = new components.Player(prog, lectB, lyrics, cover);
+				 player = new components.Player(prog, lectB, lyrics, cover, playlistCol);
 				 compt = 0;
 				 if (saveXML.getRoot() != "")
 					 dirCollection(saveXML.getRoot());
+				 
+				 var add:ContextMenuItem = new ContextMenuItem("Ajouter à la playlist");
+				 add.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, add_menuItemSelect);
+				 
+				 var cm:ContextMenu = new ContextMenu();
+				 cm.customItems.push(add);
+				 
+				 tree.contextMenu = cm;
+				 
 			}
+			
+			private function add_menuItemSelect(evt:ContextMenuEvent):void {
+					for each(var tmp:Object in tree.selectedItems)
+					{
+						if (tmp.pathName != "")
+						{
+							var inPlay:Boolean = false;
+							for (var i:Number = 0; i < playlistCol.length; i++)
+								if (tmp.pathName == playlistCol.getItemAt(i).pathName)
+									inPlay = true;
+							if (!inPlay)
+							{
+								playlistCol.addItem(tmp);
+								if (playlistCol.length == 1)
+									player.setFile(playlistCol.getItemAt(0).pathName);
+							}
+						}
+					}
+			}
+			
 			
 			public function clickLect():void
 			{
-				if (lectB.label == "assets/play.png")
+				if (player.getFile() != "")
 				{
-					player.lecture();
-					lectB.label = "assets/pause.png"
-				}
-				else
-				{
-					player.pause();
-					lectB.label = "assets/play.png";
+					if (lectB.label == "assets/play.png")
+					{
+						player.lecture();
+						lectB.label = "assets/pause.png"
+					}
+					else
+					{
+						player.pause();
+						lectB.label = "assets/play.png";
+					}
 				}
 			}
 			
@@ -157,14 +193,15 @@
 				</s:HGroup>
 				<mx:Tree id="tree" width="200" height="100%" color="#C0BBBB" columnCount="1"
 						 dataProvider="{artCol}" iconField="icon" itemRenderer="playerTreeRenderer"
-						 labelField="name" rightClick="addPlaylist()"></mx:Tree>
+						 labelField="name"></mx:Tree>
 			</s:VGroup>
 			<s:HGroup width="62%" height="100%">
 				<s:Image width="103" height="100" id="cover" source="assets/Cover.jpg"/>
 				<s:TextArea id="lyrics" width="323" height="206" borderVisible="false"
 							color="#C0BBBB" editable="false" enabled="true" text="Pas de paroles."/>
 			</s:HGroup>
-			<s:List width="24%" height="100%"></s:List>
+			<s:List id="playlist" width="24%" height="100%" color="#C0BBBB"
+					dataProvider="{playlistCol}" labelField="name"></s:List>
 		</s:HGroup>
 	</s:VGroup>
 	

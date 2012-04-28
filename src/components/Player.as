@@ -4,24 +4,24 @@ package components
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.TimerEvent;
+	import flash.media.ID3Info;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
-	import flash.media.ID3Info;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.Timer;
 	import flash.utils.clearInterval;
 	import flash.utils.setInterval;
-
-	import spark.components.Button;
-	import spark.components.HSlider;
-
 	import flash.xml.XMLDocument;
 	import flash.xml.XMLNode;
 	import flash.xml.XMLNodeType;
 	
+	import mx.collections.ArrayList;
+	
+	import spark.components.Button;
+	import spark.components.HSlider;
 	import spark.components.Image;
 	import spark.components.TextArea;
 	
@@ -36,25 +36,40 @@ package components
 		private var chanson:Sound;
 		private var canal:SoundChannel;
 		private var trans:SoundTransform;
-		private var fichier:String;
+		private var fichier:String = "";
 		private var progBar:HSlider;
 		private var lyricsField:TextArea;
 		private var image:Image;
+		private var playList:ArrayList;
+		private var current:Number;
+		
 		public function getChanson():Sound
 		{
 			return chanson;	
 		}
 		
-		public function Player(prog:HSlider, lectB:Button, lyrics:TextArea, cover:Image)
+		public function Player(prog:HSlider, lectB:Button, lyrics:TextArea, cover:Image, playList_:ArrayList)
 		{
 			lect = lectB;
 			progBar = prog;		
 			trans = new SoundTransform();
 			lyricsField = lyrics;
 			image = cover;
-			fichier = "D:\\Musique\\Within_Temptation-The_Unforgiving-CDA-2011-wAx\\04-within_temptation-faster.mp3";
+			playList = playList_;
+			current = 0;
 		}
 			
+		
+		public function setFile(path:String):void
+		{
+			fichier = path;
+		}
+		
+		public function getFile():String
+		{
+			return fichier;
+		}
+		
 		private function positionTimerHandler(event:TimerEvent):void {
 			progBar.value = canal.position / chanson.length * 100;
 		}
@@ -140,6 +155,12 @@ package components
 			canal = null;
 			chanson = null;
 			lyricsField.text = "";
+			current++;
+			if (playList.length > current)
+			{
+				fichier = playList.getItemAt(current).pathName;
+				lecture();
+			}
 		}
 		
 		
@@ -183,6 +204,8 @@ package components
 		
 		public function lecture():void
 		{
+			if (fichier != "")
+			{
 			if (charge == false) //Si la chanson n'est pas chargée
 			{	
 				chanson = new Sound();
@@ -200,6 +223,7 @@ package components
 			canal = chanson.play(decalage);
 			canal.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
 			canal.soundTransform = trans;
+			}
 		}
 
 		

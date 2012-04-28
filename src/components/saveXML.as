@@ -27,7 +27,6 @@ package components
 
 		static public function saveXMLtoFile(items_:ArrayCollection):void
 		{
-			trace(objectToXML(items_).toString());
 		}
 		
 		static public function saveRoot(path:String):void
@@ -36,7 +35,6 @@ package components
 			var file:File = new File( File.applicationDirectory.resolvePath("config.cfg").nativePath );
 			var fs:FileStream = new FileStream();
 			fs.open(file, FileMode.WRITE);
-			trace("path:" + path);
 		    fs.writeUTF(path);
 			fs.close();
 		}
@@ -45,7 +43,6 @@ package components
 		{
 			var ret:String;
 			var file:File = new File( File.applicationDirectory.resolvePath("config.cfg").nativePath );
-			trace(file.nativePath);
 			var fs:FileStream = new FileStream();
 			fs.open(file, FileMode.UPDATE)
 			if (fs.bytesAvailable == 0)
