@@ -82,6 +82,9 @@
 			
 			public function clickCollection():void
 			{
+				artCol = new ArrayCollection([
+					new Artiste("Other", new ArrayCollection([])),
+					]);
 				var file:File = new File(); 
 				file.addEventListener(Event.SELECT, dirSelected); 
 				file.browseForDirectory("Select a directory");
