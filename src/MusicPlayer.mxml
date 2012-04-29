@@ -37,10 +37,13 @@
 			
 			private function initFunc():void
 			{
-				 player = new components.Player(prog, lectB, lyrics, cover, playlistCol);
+				 player = new components.Player(prog, lectB, lyrics, cover, playlistCol, playlist);
 				 compt = 0;
 				 if (saveXML.getRoot() != "")
+				 {
 					 dirCollection(saveXML.getRoot());
+					 collection.text = saveXML.getRoot();
+				 }
 				 
 				 var add:ContextMenuItem = new ContextMenuItem("Ajouter à la playlist");
 				 add.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, add_menuItemSelect);
@@ -91,12 +94,12 @@
 			
 			public function clickNext():void
 			{
-				
+				player.next();
 			}
 			
 			public function clickPrev():void
 			{
-				
+				player.previous();
 			}
 			
 			public function clickStop():void
@@ -156,6 +159,11 @@
 					saveXML.saveXMLtoFile(artCol);
 			}
 			
+			public function playSpecZik():void
+			{
+				player.play(playlist.selectedIndex);
+			}
+			
 			public function addPlaylist():void
 			{
 				trace(new String("playlist"));
@@ -193,7 +201,7 @@
 				</s:HGroup>
 				<mx:Tree id="tree" width="200" height="100%" color="#C0BBBB" columnCount="1"
 						 dataProvider="{artCol}" iconField="icon" itemRenderer="playerTreeRenderer"
-						 labelField="name"></mx:Tree>
+						 labelField="name" rollOverColor="#4B6688" selectionColor="#2D3E54"></mx:Tree>
 			</s:VGroup>
 			<s:HGroup width="62%" height="100%">
 				<s:Image width="103" height="100" id="cover" source="assets/Cover.jpg"/>
@@ -201,7 +209,8 @@
 							color="#C0BBBB" editable="false" enabled="true" text="Pas de paroles."/>
 			</s:HGroup>
 			<s:List id="playlist" width="24%" height="100%" color="#C0BBBB"
-					dataProvider="{playlistCol}" labelField="name"></s:List>
+					dataProvider="{playlistCol}" labelField="name" rightClick="playSpecZik()"
+					rollOverColor="#4B6688" selectionColor="#2D3E54"></s:List>
 		</s:HGroup>
 	</s:VGroup>
 	

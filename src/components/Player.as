@@ -23,6 +23,7 @@ package components
 	import spark.components.Button;
 	import spark.components.HSlider;
 	import spark.components.Image;
+	import spark.components.List;
 	import spark.components.TextArea;
 	
 
@@ -41,14 +42,19 @@ package components
 		private var lyricsField:TextArea;
 		private var image:Image;
 		private var playList:ArrayList;
-		private var current:Number;
+		private var current:int;
+		private var list:List;
+		
+		public function getCurrent():int{
+			return current;
+		}
 		
 		public function getChanson():Sound
 		{
 			return chanson;	
 		}
 		
-		public function Player(prog:HSlider, lectB:Button, lyrics:TextArea, cover:Image, playList_:ArrayList)
+		public function Player(prog:HSlider, lectB:Button, lyrics:TextArea, cover:Image, playList_:ArrayList, list_:List)
 		{
 			lect = lectB;
 			progBar = prog;		
@@ -57,6 +63,7 @@ package components
 			image = cover;
 			playList = playList_;
 			current = 0;
+			list = list_;
 		}
 			
 		
@@ -142,7 +149,80 @@ package components
 		}
 		
 		private function progressHandler(event:ProgressEvent):void {
-			trace("progressHandler: " + event);
+		}
+		
+		public function next():void
+		{
+			if (canal != null)
+			{
+				canal.stop();
+				positionTimer.stop();
+			}
+			lect.label = "assets/play.png";
+			progBar.value = 0;
+			charge = false;
+			decalage = 0;
+			canal = null;
+			chanson = null;
+			lyricsField.text = "";
+			if (playList.length > current + 1)
+			{
+				current++;
+				fichier = playList.getItemAt(current).pathName;
+				lecture();
+				lect.label = "assets/pause.png";
+			}
+		}
+		
+		
+		public function play(index:int):void
+		{
+			if (canal != null)
+			{
+				canal.stop();
+				positionTimer.stop();
+			}
+			lect.label = "assets/play.png";
+			progBar.value = 0;
+			charge = false;
+			decalage = 0;
+			canal = null;
+			chanson = null;
+			lyricsField.text = "";
+			current = index;
+			if (current >= 0 && current < playList.length)
+			{
+				fichier = playList.getItemAt(current).pathName;
+				lecture();
+				lect.label = "assets/pause.png";
+				list.selectedIndex = current;
+			}
+			else
+				current = 0;
+		}
+		
+		public function previous():void
+		{
+			if (canal != null)
+			{
+				canal.stop();
+				positionTimer.stop();
+			}
+			lect.label = "assets/play.png";
+			progBar.value = 0;
+			charge = false;
+			decalage = 0;
+			canal = null;
+			chanson = null;
+			lyricsField.text = "";
+			if (current > 0)
+			{
+				current--;
+				fichier = playList.getItemAt(current).pathName;
+				lecture();
+				lect.label = "assets/pause.png";
+				list.selectedIndex = current;
+			}
 		}
 		
 		private function soundCompleteHandler(event:Event):void {
@@ -155,11 +235,13 @@ package components
 			canal = null;
 			chanson = null;
 			lyricsField.text = "";
-			current++;
-			if (playList.length > current)
+			if (playList.length > current + 1)
 			{
+				current++;
 				fichier = playList.getItemAt(current).pathName;
 				lecture();
+				lect.label = "assets/pause.png";
+				list.selectedIndex = current;
 			}
 		}
 		
@@ -189,6 +271,8 @@ package components
 				canal.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
 				canal.soundTransform = trans;
 			}
+			else
+				progBar.value = 0;
 		}
 		
 		public function setVolume(vol:Number):void
@@ -223,6 +307,7 @@ package components
 			canal = chanson.play(decalage);
 			canal.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
 			canal.soundTransform = trans;
+			list.selectedIndex = current;
 			}
 		}
 

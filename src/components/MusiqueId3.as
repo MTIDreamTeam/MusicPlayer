@@ -25,8 +25,11 @@ package components
 			chanson.addEventListener(Event.ID3, id3Handler);
 			chanson.load(new URLRequest(path.nativePath));
 			zik = new Zik(path.name, path.nativePath, icon_);
+			trace(zik.name);
 			artCol = _artCol;
 			icon = icon_;
+			art = "Other";
+			addMusique();
 		}
 		
 		
@@ -34,18 +37,26 @@ package components
 		{
 			id3 = chanson.id3;
 			art = "Other";
-			if (id3 != null)
+			if (id3 != null && id3.artist != null && id3.artist != "" && id3.songName != "")
 			{
 				art = id3.artist;
 				zik.name = id3.songName;
-			}
-			if (art != "" && zik.name != "" && art != null)
 				addMusique();
+			}			
 		}
 		
 		private function addMusique():void {
 			var added:Boolean = false;
-			for(var i:Number=0; i < artCol.length; i++) {
+			for(var i:Number=0; i < artCol.length; i++)
+			{
+				if (artCol.getItemAt(i).name == "Other" && art != "Other")
+				{
+					for (var j:Number = 0; j < artCol.getItemAt(i).children.length; j++)
+					{
+						if (artCol.getItemAt(i).children.getItemAt(j).pathName == zik.pathName)
+							artCol.getItemAt(i).children.removeItemAt(j);
+					}
+				}
 				if (artCol.getItemAt(i).name == art)
 				{
 					for (var j:Number = 0; j < artCol.getItemAt(i).children.length; j++)
