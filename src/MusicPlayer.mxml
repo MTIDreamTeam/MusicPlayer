@@ -37,6 +37,7 @@
 			
 			private function initFunc():void
 			{
+				//Double click
 				playlist.doubleClickEnabled = true;
 				playlist.addEventListener(MouseEvent.DOUBLE_CLICK, playSpecZik);
 				
@@ -162,7 +163,7 @@
 					saveXML.saveXMLtoFile(artCol);
 			}
 			
-			public function playSpecZik(eevnt:MouseEvent):void
+			public function playSpecZik(event:MouseEvent):void
 			{
 				player.play(playlist.selectedIndex);
 			}
@@ -207,8 +208,8 @@
 						 labelField="name" rollOverColor="#4B6688" selectionColor="#2D3E54"></mx:Tree>
 			</s:VGroup>
 			<s:HGroup width="62%" height="100%">
-				<s:Image width="103" height="100" id="cover" source="assets/Cover.jpg"/>
-				<s:TextArea id="lyrics" width="347" height="441" borderVisible="false"
+				<s:Image width="100" height="100" id="cover" source="assets/Cover.jpg"/>
+				<s:TextArea id="lyrics" width="347" height="100%" borderVisible="false"
 							color="#C0BBBB" editable="false" enabled="true" text="Pas de paroles."/>
 			</s:HGroup>
 			<s:List id="playlist" width="24%" height="100%" color="#C0BBBB"
