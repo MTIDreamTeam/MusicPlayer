@@ -49,6 +49,9 @@
 					 collection.text = saveXML.getRoot();
 				 }
 				 
+				 tree.doubleClickEnabled = true;
+				 tree.addEventListener(MouseEvent.DOUBLE_CLICK, add_menuItemSelect);
+				 /*
 				 var add:ContextMenuItem = new ContextMenuItem("Ajouter à la playlist");
 				 add.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, add_menuItemSelect);
 				 
@@ -56,10 +59,10 @@
 				 cm.customItems.push(add);
 				 
 				 tree.contextMenu = cm;
-				 
+				 */
 			}
 			
-			private function add_menuItemSelect(evt:ContextMenuEvent):void {
+			private function add_menuItemSelect(evt:MouseEvent):void {
 					for each(var tmp:Object in tree.selectedItems)
 					{
 						if (tmp.pathName != "")
