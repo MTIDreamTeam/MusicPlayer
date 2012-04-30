@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="858" height="497" backgroundColor="#444242"
+					   creationComplete="initFunc()">
+	<fx:Style source="MusicPlayer.css"/>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import components.Artiste;
+			import components.MusiqueId3;
+			import components.Player;
+			import components.Zik;
+			import components.saveXML;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.collections.XMLListCollection;
+			import mx.controls.FileSystemList;
+			var player:components.Player;
+			
+			[Bindable]
+			private var playlistCol:ArrayList = new ArrayList();
+			
+			[Bindable]
+			private var artCol:ArrayCollection = new ArrayCollection([
+				new Artiste("Other", new ArrayCollection([])),
+			]);
+			
+			[Bindable]
+			[Embed(source="assets/music.png")] 
+			public var iconSymbolZik:Class;
+			private var compt:Number;
+			
+			private function initFunc():void
+			{
+				playlist.doubleClickEnabled = true;
+				playlist.addEventListener(MouseEvent.DOUBLE_CLICK, playSpecZik);
+				
+				 player = new components.Player(prog, lectB, lyrics, cover, playlistCol, playlist);
+				 compt = 0;
+				 if (saveXML.getRoot() != "")
+				 {
+					 dirCollection(saveXML.getRoot());
+					 collection.text = saveXML.getRoot();
+				 }
+				 
+				 var add:ContextMenuItem = new ContextMenuItem("Ajouter à la playlist");
+				 add.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, add_menuItemSelect);
+				 
+				 var cm:ContextMenu = new ContextMenu();
+				 cm.customItems.push(add);
+				 
+				 tree.contextMenu = cm;
+				 
+			}
+			
+			private function add_menuItemSelect(evt:ContextMenuEvent):void {
+					for each(var tmp:Object in tree.selectedItems)
+					{
+						if (tmp.pathName != "")
+						{
+							var inPlay:Boolean = false;
+							for (var i:Number = 0; i < playlistCol.length; i++)
+								if (tmp.pathName == playlistCol.getItemAt(i).pathName)
+									inPlay = true;
+							if (!inPlay)
+							{
+								playlistCol.addItem(tmp);
+								if (playlistCol.length == 1)
+									player.setFile(playlistCol.getItemAt(0).pathName);
+							}
+						}
+					}
+			}
+			
+			
+			public function clickLect():void
+			{
+				if (player.getFile() != "")
+				{
+					if (lectB.label == "assets/play.png")
+					{
+						player.lecture();
+						lectB.label = "assets/pause.png"
+					}
+					else
+					{
+						player.pause();
+						lectB.label = "assets/play.png";
+					}
+				}
+			}
+			
+			public function clickNext():void
+			{
+				player.next();
+			}
+			
+			public function clickPrev():void
+			{
+				player.previous();
+			}
+			
+			public function clickStop():void
+			{
+				player.stop();
+				lectB.label = "assets/play.png";
+			}
+			
+			public function volumeChanged():void
+			{
+				player.setVolume(volumeB.value);
+				if (volumeB.value == 0)
+					volB.label = "assets/mute.png";
+				else if (volumeB.value > 0 && volumeB.value < 0.5)
+					volB.label = "assets/volume_down.png";
+				else
+					volB.label = "assets/volume_up.png";
+			}
+			
+			public function clickCollection():void
+			{
+				artCol = new ArrayCollection([
+					new Artiste("Other", new ArrayCollection([])),
+					]);
+				var file:File = new File(); 
+				file.addEventListener(Event.SELECT, dirSelected); 
+				file.browseForDirectory("Select a directory");
+				function dirSelected(e:Event):void { 
+					collection.text = file.nativePath;
+					saveXML.saveRoot(file.nativePath);
+					dirCollection(file.nativePath);
+				}
+			}
+			
+			public function dirCollection(root:String):void
+			{
+				var file:File = new File(root);
+				var lastZik:MusiqueId3 = null;
+				var todo:Boolean = false;
+				if (compt == 0)
+				{
+					compt++;
+					todo = true;
+				}
+				
+				for each(var f:File in file.getDirectoryListing())
+				{
+					if (f.isDirectory)
+						dirCollection(f.nativePath);
+					else
+						if (f.extension == "mp3")
+						{	
+								var zik:MusiqueId3 = new MusiqueId3(f, artCol, iconSymbolZik);
+						}
+				}
+				if (todo == true)
+					saveXML.saveXMLtoFile(artCol);
+			}
+			
+			public function playSpecZik(eevnt:MouseEvent):void
+			{
+				player.play(playlist.selectedIndex);
+			}
+			
+			public function addPlaylist():void
+			{
+				trace(new String("playlist"));
+			}
+			
+			public function barChange():void
+			{
+				player.adjustTime(prog.value);
+			}
+		]]>
+	</fx:Script>
+	<s:VGroup x="0" y="-1" width="100%" height="100%">
+		<s:HGroup width="100%" height="10%">
+			<s:Button id="lectB" width="50" height="50" label="assets/play.png" click="clickLect()" skinClass="buttonStopSkin"/>
+			<s:Button width="50" height="50" click="clickStop()" label="assets/stop.png"
+					  skinClass="buttonStopSkin"/>
+			<s:Button width="50" height="50" click="clickPrev()" label="assets/fast_backward.png"
+					  skinClass="buttonStopSkin"/>
+			<s:HSlider id="prog" width="543" height="100%" change="barChange()" maximum="100"
+					   minimum="0" skinClass="HSliderPlayer" stepSize="0.01" value="0"/>
+			<s:Button width="50" height="50" click="clickNext()" label="assets/fast_forward.png"
+					  skinClass="buttonStopSkin"/>
+			<s:Button id="volB" width="50" height="50" label="assets/volume_up.png" enabled="false"
+					  skinClass="ButtonVolSkin"/>
+			<s:VSlider id="volumeB" height="100%" change="volumeChanged()" maximum="1.0"
+					   skinClass="VSliderPlayer" stepSize="0.05" value="1.0"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="90%">
+			<s:VGroup width="24%" height="100%">
+				<s:HGroup width="200" height="30">
+					<s:Button width="30" height="30" label="assets/music.png" click="clickCollection()"
+							  skinClass="buttonIconSkin"/>
+					<s:Label id="collection" width="100%" height="30" color="#C0BBBB" fontSize="10"
+							 paddingLeft="10" paddingTop="8" text="Collection non définie"/>
+				</s:HGroup>
+				<mx:Tree id="tree" width="200" height="100%" color="#C0BBBB" columnCount="1"
+						 dataProvider="{artCol}" iconField="icon" itemRenderer="playerTreeRenderer"
+						 labelField="name" rollOverColor="#4B6688" selectionColor="#2D3E54"></mx:Tree>
+			</s:VGroup>
+			<s:HGroup width="62%" height="100%">
+				<s:Image width="103" height="100" id="cover" source="assets/Cover.jpg"/>
+				<s:TextArea id="lyrics" width="347" height="441" borderVisible="false"
+							color="#C0BBBB" editable="false" enabled="true" text="Pas de paroles."/>
+			</s:HGroup>
+			<s:List id="playlist" width="24%" height="100%" color="#C0BBBB"
+					dataProvider="{playlistCol}" labelField="name"
+					rollOverColor="#4B6688" selectionColor="#2D3E54"></s:List>
+		</s:HGroup>
+	</s:VGroup>
+	
+</s:WindowedApplication>
